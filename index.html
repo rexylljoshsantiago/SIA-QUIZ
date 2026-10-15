@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ITP09 Identification Quiz</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--tx:#1d2433;--mut:#6b7385;--pri:#2f5bea;--ok:#188a4a;--bad:#c93636;--bd:#dde1ea;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12151c;--card:#1b2030;--tx:#e8ebf3;--mut:#9aa3b8;--pri:#7b9bff;--ok:#4cc98a;--bad:#ff7b7b;--bd:#2d3450;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:680px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.4rem;margin:.2em 0}p.s{color:var(--mut);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:20px;margin-bottom:16px}
+label.o{display:block;padding:10px 12px;border:1px solid var(--bd);border-radius:10px;margin:8px 0;cursor:pointer}
+label.o:has(input:checked){border-color:var(--pri);background:color-mix(in srgb,var(--pri) 10%,transparent)}
+h3{margin:16px 0 4px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mut)}
+button{font:inherit;padding:11px 18px;border-radius:10px;border:1px solid var(--pri);background:var(--pri);color:#fff;cursor:pointer}
+button.g{background:transparent;color:var(--pri)}button:disabled{opacity:.4;cursor:not-allowed}
+input[type=text]{width:100%;font:inherit;padding:12px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.top{display:flex;justify-content:space-between;color:var(--mut);font-size:.9rem;margin-bottom:8px}
+.bar{height:6px;background:var(--bd);border-radius:6px;overflow:hidden;margin-bottom:16px}.bar i{display:block;height:100%;background:var(--pri)}
+.tag{display:inline-block;font-size:.75rem;padding:2px 8px;border-radius:20px;background:var(--bd);color:var(--mut);margin-bottom:10px}
+.q{font-size:1.08rem}.fb{margin-top:14px;padding:12px;border-radius:10px;border:1px solid}.fb.ok{color:var(--ok)}.fb.no{color:var(--bad)}
+.fb b{color:var(--tx)}.hide{display:none}.big{font-size:2.4rem;font-weight:700}
+</style></head><body><main>
+<h1>ITP09 Identification Quiz</h1><p class="s">Chapters 5 and 6 · System Integration and Architecture</p>
+
+<div id="setup" class="card">
+<h3 style="margin-top:0">Quiz type</h3>
+<label class="o"><input type="radio" name="m" value="t" checked> Terms – read the definition, identify the term</label>
+<label class="o"><input type="radio" name="m" value="e"> Examples – read the example, identify the term</label>
+<h3>Chapter</h3>
+<label class="o"><input type="radio" name="c" value="0" checked> Chapters 5 and 6</label>
+<label class="o"><input type="radio" name="c" value="5"> Chapter 5 only</label>
+<label class="o"><input type="radio" name="c" value="6"> Chapter 6 only</label>
+<div class="row"><button id="go">Start quiz</button></div>
+</div>
+
+<div id="quiz" class="hide">
+<div class="top"><span id="pos"></span><span id="sc"></span></div><div class="bar"><i id="pb"></i></div>
+<div class="card"><span class="tag" id="tg"></span><div class="q" id="qt"></div>
+<div style="margin-top:14px"><input type="text" id="ans" placeholder="Type your answer…" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+<div class="row"><button id="chk">Check answer</button><button class="g" id="rev">Show answer</button><button id="nx" disabled>Next →</button></div>
+<div id="fb" class="fb hide"></div></div></div>
+
+<div id="end" class="card hide" style="text-align:center"><div class="big" id="fs"></div><p id="fm" class="s"></p>
+<div class="row" style="justify-content:center"><button id="again">Try again</button><button class="g" id="home">Change settings</button></div></div>
+
+<script>
+// [chapter, "Term|aliases", definition, example]
+const D=[
+[5,"Scalability","Scalability is a system’s ability to handle increasing users, data, or workload while maintaining acceptable performance.","A school’s student information system initially supports 500 students. As the school grows to 5,000 students, the system can process more logins, grade records, and course registrations without slowing down or crashing."],
+[5,"Vertical scalability","Increasing the capacity of a single server by adding more CPU, memory, or storage.","Upgrading a server from 8 GB to 32 GB of RAM."],
+[5,"Horizontal scalability","Adding more servers or machines to distribute the workload.","Adding additional web servers to handle more website visitors."],
+[5,"Diagonal scalability","Combining vertical and horizontal scaling.","Upgrading existing servers while also adding more servers to support rapid growth."],
+[5,"Performance optimization","Performance optimization is the process of improving a system so that it responds faster, uses fewer resources, and works more efficiently.","A school management system takes 10 seconds to display student records. Developers optimize the database query and remove unnecessary code, reducing the loading time to 2 seconds."],
+[5,"Code optimization","Improving program code to run faster.","Removing unnecessary loops or calculations."],
+[5,"Database optimization","Improving how data is stored and retrieved.","Adding an index so student records can be searched more quickly."],
+[5,"Network optimization","Reducing the time needed to transfer data.","Compressing files before sending them over the network."],
+[5,"Resource optimization","Using CPU, memory, and storage efficiently.","Closing unused processes to free up memory."],
+[5,"User-interface optimization","Making screens and features load faster.","Compressing images so a webpage opens more quickly."],
+[5,"Performance monitoring","Performance monitoring is the process of continuously observing a system to measure its speed, stability, resource usage, and overall performance.","A school management system monitors how long it takes to load student records. If the loading time becomes too slow, administrators can identify and resolve the problem."],
+[5,"Application monitoring","Tracks how well the application functions.","Measuring page-loading time and error rates."],
+[5,"Server monitoring","Checks the health and performance of servers.","Monitoring CPU usage, memory usage, and disk space."],
+[5,"Database monitoring","Observes database speed and activity.","Identifying slow queries that delay student record searches."],
+[5,"Network monitoring","Measures network performance and connectivity.","Detecting high network latency or dropped connections."],
+[5,"User-experience monitoring","Measures how users experience the system.","Tracking how long users wait for a page to respond."],
+[5,"Integration testing","Integration testing is the process of testing whether different modules, components, or systems work correctly when connected.","In a school management system, integration testing checks whether the student registration module correctly sends new student information to the payment and class-scheduling modules."],
+[5,"Big-bang integration testing","All modules are combined and tested at the same time.","Testing the entire school system after connecting registration, payment, and scheduling modules."],
+[5,"Top-down integration testing","Testing begins with the main or higher-level modules before lower-level modules.","Testing the student registration interface before testing the database module."],
+[5,"Bottom-up integration testing","Testing begins with the lower-level modules before higher-level modules.","Testing the database and payment-processing modules before connecting them to the user interface."],
+[5,"Incremental integration testing","Modules are connected and tested gradually.","Testing registration with the database first, then adding payment and testing the connection again."],
+[5,"Regression testing","Regression testing is the process of retesting a system after changes are made to ensure that existing features still work correctly.","After developers update the payment feature in a school management system, regression testing checks whether student registration, login, grade viewing, and report generation still function properly."],
+[5,"Complete regression testing","Tests the entire system after major changes.","Testing all school system features after a major software update."],
+[5,"Partial regression testing","Tests only the features affected by a change and their related functions.","Testing payment and student registration after changing the payment module."],
+[5,"Corrective regression testing","Checks that existing features still work when no new features are added.","Retesting login after fixing a login error."],
+[5,"Selective regression testing","Tests selected parts of the system to save time.","Testing only grade entry and report generation after updating the grading module."],
+[5,"Performance testing","Performance testing evaluates how well a system performs in terms of speed, stability, responsiveness, and resource usage under specific workloads.","A school management system is tested with 1,000 users logging in at the same time to determine whether it remains fast and stable."],
+[5,"Load testing","Tests the system under its expected number of users or transactions.","Testing the system with 500 students accessing their grades simultaneously."],
+[5,"Stress testing","Tests the system beyond its normal capacity.","Testing what happens when 5,000 users access the system at once."],
+[5,"Volume testing","Tests how the system handles a large amount of data.","Checking whether the system can quickly search thousands of student records."],
+[5,"Endurance testing","Tests system performance over a long period.","Running the system continuously for 24 hours to detect memory leaks."],
+[5,"Spike testing","Tests the system during sudden increases or decreases in workload.","Simulating a sudden increase in users when final grades are released."],
+[5,"Error handling","Error handling is the process of detecting, managing, and responding to errors so a system can continue operating properly or provide a clear message to the user.","If a user enters an incorrect password in a school management system, the system displays “Invalid username or password” instead of crashing."],
+[5,"Input validation","Checks whether user input is correct and complete.","Preventing a user from submitting a registration form with an empty student ID."],
+[5,"Exception handling","Manages unexpected problems during program execution.","Displaying an error message when the system cannot connect to the database."],
+[5,"Error logging","Records error details for later investigation.","Saving the time, cause, and location of a system error in a log file."],
+[5,"Recovery handling","Attempts to restore normal operation after an error.","Automatically reconnecting to the database after a temporary connection failure."],
+[5,"User notification","Informs users about errors in a clear and understandable way.","Showing “File upload failed. Please try again” when a document cannot be uploaded."],
+[6,"Artificial Intelligence and Machine Learning (AI/ML)|AI/ML|Artificial Intelligence and Machine Learning|AI and ML","Uses intelligent algorithms to automatically map complex data fields, predict pipeline failures, and optimize traffic routing across systems.","An integration engine automatically matches mismatched customer fields between an older on-premises database and a modern cloud CRM without manual rules."],
+[6,"API-Led Connectivity and Microservices|API-Led Connectivity|Microservices","Connects modular, independent software services through standardized interfaces so systems can share data without requiring a complete rewrite.","A banking app uses dedicated APIs to fetch balances from a legacy mainframe while routing card payments through an isolated microservice."],
+[6,"Internet of Things (IoT)|IoT|Internet of Things","Bridges physical sensors and smart devices to enterprise networks to feed real-time operational telemetry into core business software.","Smart cargo sensors continuously stream temperature readings to a central logistics platform, instantly triggering an alert if food shipments get too warm."],
+[6,"Cloud-Native and Hybrid Integration|Cloud-Native Integration|Hybrid Integration","Connects on-premises infrastructure with cloud applications to scale data flows dynamically across mixed enterprise environments.","A healthcare network keeps sensitive patient medical records on private local servers while securely syncing appointment slots to a cloud-hosted mobile app."],
+[6,"Low-Code / No-Code Integration Platforms|Low-Code|No-Code|Low Code No Code","Provides visual drag-and-drop interfaces that let users build, test, and automate system connections with little to no programming.","A human resources team uses visual workflow automation to generate corporate email accounts and IT support tickets the moment a recruit is marked as hired."],
+[6,"Blockchain Technology|Blockchain","Secures multi-party data transactions across a decentralized, tamper-resistant ledger to eliminate the need for centralized intermediaries.","Global shipping partners record cargo transfers on a shared ledger, triggering automatic smart contract payouts the moment delivery is digitally confirmed."],
+[6,"API Management","API Management is the set of tools and practices used to design, secure, publish, monitor, and maintain APIs throughout their entire lifecycle.","When you pay on an online shopping app, an API Gateway securely checks your login, blocks spam requests, and safely routes your transaction to payment processors like PayPal or credit card networks."],
+[6,"API Gateway","Manages traffic, enforces security rules, and routes calls.","Blocking bot attacks and routing orders during a flash sale"],
+[6,"Developer Portal","Provides documentation, sandbox keys, and code samples","Letting third-party partners grab API keys and test checkout endpoints"],
+[6,"API Lifecycle Manager","Manages endpoint changes and version upgrades.","Keeping older app versions working while releasing a new payment API"],
+[6,"API Analytics Engine","Tracks performance metrics and system health.","Alerting engineers when payment processing speeds slow down"],
+[6,"DevOps","DevOps is a set of cultural practices, philosophies, and tools that integrates software development (Dev) with IT operations (Ops) to build, test, and release software faster and more reliably.","A streaming platform releasing daily app improvements and bug fixes seamlessly without interrupting active viewers."],
+[6,"Continuous Integration & Delivery (CI/CD)|CI/CD|Continuous Integration and Delivery|Continuous Integration and Continuous Delivery","Automates code building, testing, and deployment.","Automatically running test suites and pushing updates live whenever code is approved. (e.g. Github Actions)"],
+[6,"Infrastructure as Code (IaC)|IaC|Infrastructure as Code","Manages servers, networks, and cloud resources using configuration files instead of manual setup.","Spinning up identical staging and production environments in minutes using a single script."],
+[6,"Containerization & Orchestration|Containerization and Orchestration|Containerization|Orchestration","Packages applications with their dependencies so they run consistently anywhere.","Running search, shopping cart, and payment features as isolated containers that scale independently."],
+[6,"Continuous Monitoring & Observability|Continuous Monitoring and Observability|Observability","Tracks system health, performance metrics, and logs in real time.","Catching high server memory usage during a traffic surge and notifying on-call engineers before users notice."],
+[6,"Blue-Green Deployment","Maintains two identical production environments, switching all live traffic from the old version (Blue) to the new version (Green) instantly.","Switching DNS routing to the newly updated server cluster once all health checks pass."],
+[6,"Canary Deployment","Rolls out the update to a small percentage of users first before releasing it to everyone.","Directing 5% of app users to the new version to monitor error rates before a 100% rollout."],
+[6,"Rolling Deployment","Gradually replaces running instances of the old version with the new version batch by batch until complete.","Updating 2 out of 10 application pods at a time so the platform stays online during the update."],
+[6,"Recreate Deployment","Completely shuts down the existing application version before starting up the new one.","Taking an internal system offline during scheduled midnight maintenance to apply breaking database changes."],
+[6,"Cloud Deployment|Cloud Deployment","Cloud deployment is the process of setting up, hosting, and running applications and services on virtual cloud infrastructure rather than on local physical servers.",null],
+[6,"Public Cloud","Infrastructure owned and managed by a third-party provider, shared among multiple organizations over the internet.","A startup hosting its mobile app backend on AWS or Google Cloud to automatically scale server capacity with user traffic."],
+[6,"Private Cloud","Dedicated infrastructure used exclusively by a single organization, hosted either on-premises or by a third party.","A bank running its core financial transaction engine inside an isolated, proprietary data center to meet strict compliance laws."],
+[6,"Hybrid Cloud","A blend of public and private environments that allows data and applications to be shared between them.","A hospital storing confidential patient records on a secure private server while using the public cloud to run its patient appointment portal."],
+[6,"Multi-Cloud","Using services from two or more independent cloud providers to optimize features and avoid vendor lock-in.","Running enterprise web servers on Azure while leveraging Google Cloud's BigQuery to perform heavy data analytics."]
+];
+const $=id=>document.getElementById(id);
+const STOP=new Set("testing scalability optimization monitoring deployment regression integration handling the a an and of".split(" "));
+const norm=s=>s.toLowerCase().replace(/&/g," and ").replace(/[^a-z0-9]+/g," ").trim();
+const key=s=>{const k=norm(s).split(" ").filter(w=>!STOP.has(w)).join(" ");return k||norm(s)};
+const items=D.map(([c,t,d,e])=>{const p=t.split("|");return{c,name:p[0].replace(/\s*\(.*\)/,""),full:p[0],al:p,d,e}});
+const kc={};items.forEach(i=>{const k=key(i.name);kc[k]=(kc[k]||0)+1;i.k=k});
+const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+const mask=(s,i)=>{let r=s;[i.full,i.name].forEach(n=>{r=r.replace(new RegExp(esc(n),"gi"),"_____")});return r};
+const ok=(a,i)=>{const n=norm(a);if(!n)return false;
+ if(i.al.some(x=>norm(x)===n||norm(x.replace(/\s*\(.*\)/,""))===n))return true;
+ return kc[i.k]===1&&key(a)===i.k};
+let Q,idx,score,done,mode;
+const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const val=n=>document.querySelector(`input[name=${n}]:checked`).value;
+function start(){mode=val("m");const c=+val("c");
+ Q=shuf(items.filter(i=>(!c||i.c===c)&&(mode==="t"||i.e)));idx=0;score=0;
+ $("setup").classList.add("hide");$("end").classList.add("hide");$("quiz").classList.remove("hide");show()}
+function show(){const i=Q[idx];done=false;
+ $("pos").textContent=`Question ${idx+1} of ${Q.length}`;$("sc").textContent=`Score: ${score}`;
+ $("pb").style.width=(idx/Q.length*100)+"%";
+ $("tg").textContent=`Chapter ${i.c} · ${mode==="t"?"Definition":"Example"}`;
+ $("qt").textContent=(mode==="t"?"Which term is described?\n\n":"Which term does this example illustrate?\n\n")+mask(mode==="t"?i.d:i.e,i);
+ $("qt").style.whiteSpace="pre-wrap";
+ const a=$("ans");a.value="";a.disabled=false;a.focus();
+ $("fb").className="fb hide";$("chk").disabled=false;$("rev").disabled=false;$("nx").disabled=true;
+ $("nx").textContent=idx===Q.length-1?"Finish":"Next →"}
+function reveal(good,shown){const i=Q[idx];done=true;
+ if(good)score++;
+ $("sc").textContent=`Score: ${score}`;
+ const f=$("fb");f.className="fb "+(good?"ok":"no");
+ f.innerHTML=(good?"✔ Correct! ":(shown?"Answer: ":"✘ Not quite. Correct answer: "))+`<b>${i.full}</b>`;
+ $("ans").disabled=true;$("chk").disabled=true;$("rev").disabled=true;$("nx").disabled=false;$("nx").focus()}
+$("go").onclick=start;
+$("chk").onclick=()=>{if(!done&&$("ans").value.trim())reveal(ok($("ans").value,Q[idx]),false)};
+$("rev").onclick=()=>{if(!done)reveal(false,true)};
+$("nx").onclick=()=>{if(!done)return;idx++;if(idx>=Q.length){$("quiz").classList.add("hide");$("end").classList.remove("hide");
+ $("fs").textContent=`${score} / ${Q.length}`;const p=Math.round(score/Q.length*100);
+ $("fm").textContent=`${p}% correct. `+(p>=90?"Excellent!":p>=70?"Good job. Keep reviewing the ones you missed.":"Keep practicing. You can do it!")}else show()};
+$("ans").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();done?$("nx").click():$("chk").click()}});
+$("again").onclick=start;
+$("home").onclick=()=>{$("end").classList.add("hide");$("setup").classList.remove("hide")};
+</script></main></body></html>
